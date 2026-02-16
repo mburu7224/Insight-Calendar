@@ -1,0 +1,380 @@
+:root {
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --ink: #1f2933;
+  --muted: #6b7785;
+  --line: #d8dee4;
+  --accent: #0f766e;
+  --accent-soft: #d7f4f1;
+  --feast: #f59e0b;
+  --sabbath: #2563eb;
+  --newmoon: #7c3aed;
+  --danger: #b91c1c;
+  --radius: 14px;
+  --shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background:
+    radial-gradient(circle at 5% 0%, #e5f4ff 0%, transparent 38%),
+    radial-gradient(circle at 95% 12%, #e6fff6 0%, transparent 32%),
+    var(--bg);
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.topbar {
+  background: linear-gradient(135deg, #0f766e, #155e75);
+  color: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.brand-block h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.brand-block p {
+  margin: 0.25rem 0 0;
+  opacity: 0.92;
+  font-size: 0.95rem;
+}
+
+.year-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.year-controls input {
+  width: 6rem;
+  border: 1px solid #ffffff66;
+  border-radius: 10px;
+  padding: 0.45rem 0.55rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.live-clock {
+  width: 100%;
+  margin-top: 0.35rem;
+  text-align: right;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #ffffff44;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 0.84rem;
+}
+
+#biblicalYearLabel {
+  font-weight: 700;
+}
+
+#time24Label {
+  margin-top: 0.15rem;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.95rem;
+}
+
+#sunsetTransitionLabel {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  opacity: 0.95;
+}
+
+.main-nav {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+
+.nav-item {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 0.55rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  background: var(--accent-soft);
+  color: #065f46;
+  border-color: #8ed8cf;
+}
+
+.content {
+  margin-top: 1rem;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #eef2f7;
+  color: #334155;
+}
+
+.month-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.month-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.month-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.month-meta {
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+
+.inline-feasts {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  border: none;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #9a3412;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.monthly-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.panel select,
+.panel input,
+.panel button {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+}
+
+.day-head,
+.day-cell {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  min-height: 72px;
+  padding: 0.35rem;
+  background: #fff;
+}
+
+.day-head {
+  min-height: auto;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.day-cell .num {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.day-cell.sabbath {
+  border-color: #9bc3ff;
+  background: #ecf4ff;
+}
+
+.day-cell.newmoon {
+  outline: 2px solid #d8c2ff;
+  background: #f8f4ff;
+}
+
+.day-cell.feast {
+  border-color: #ffd7a6;
+  background: #fff7ed;
+}
+
+.day-cell.current-day {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 2px #a7f3d0, 0 0 14px rgba(15, 118, 110, 0.55);
+  animation: dayGlow 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes dayGlow {
+  from {
+    box-shadow: 0 0 0 2px #a7f3d0, 0 0 8px rgba(15, 118, 110, 0.35);
+  }
+  to {
+    box-shadow: 0 0 0 2px #6ee7b7, 0 0 16px rgba(15, 118, 110, 0.65);
+  }
+}
+
+.day-note {
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+.log-list {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.log-item {
+  border: 1px solid #fee2e2;
+  border-left: 6px solid var(--danger);
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: #fff;
+}
+
+.log-item .when {
+  font-size: 0.77rem;
+  color: var(--muted);
+}
+
+.scripture-list {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.scripture-list li {
+  padding: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  list-style: none;
+  background: #fff;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 0.45rem 0.6rem;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: #0f766e;
+}
+
+.btn.ghost {
+  background: #fff;
+  color: #0f172a;
+}
+
+.settings-grid {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.6rem;
+  gap: 0.8rem;
+}
+
+.legend {
+  margin-top: 0.7rem;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.legend .tag {
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 900px) {
+  .monthly-layout {
+    grid-template-columns: 1fr;
+  }
+}

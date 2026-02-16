@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblical Calendar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <h1>Biblical Calendar</h1>
+        <p>Predictive and Observational Biblical Year Tracking</p>
+        <p id="todayBiblicalLabel">Today: --</p>
+      </div>
+      <div class="year-controls">
+        <button id="prevYear" class="btn ghost" aria-label="Previous year">-</button>
+        <label for="yearInput">Biblical Year</label>
+        <input id="yearInput" type="number" min="1" max="9999" step="1">
+        <button id="nextYear" class="btn ghost" aria-label="Next year">+</button>
+        <div class="live-clock" aria-live="polite">
+          <div id="biblicalYearLabel">Biblical Year --</div>
+          <div id="time24Label">24h Time --:--:--</div>
+          <div id="sunsetTransitionLabel">Sunset transition --</div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="main-nav" id="mainNav" aria-label="Main Navigation">
+      <button class="nav-item active" data-role="mode" data-value="predictive">Predictive Mode</button>
+      <button class="nav-item" data-role="mode" data-value="observational">Observational Mode</button>
+      <button class="nav-item active" data-role="view" data-value="yearly">Yearly Overview</button>
+      <button class="nav-item" data-role="view" data-value="monthly">Monthly View</button>
+      <button class="nav-item" data-role="view" data-value="scripture">Scripture Explorer</button>
+      <button class="nav-item" data-role="view" data-value="changelog">Change Log</button>
+      <button class="nav-item" data-role="view" data-value="settings">Settings</button>
+    </nav>
+
+    <main id="appContent" class="content" aria-live="polite"></main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
