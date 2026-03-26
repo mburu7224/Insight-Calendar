@@ -9,16 +9,26 @@ import {
   renderSettings,
   renderYearlyOverview
 } from './modules/uiRenderer.js';
-import { addDays, fromIsoDateLocal, getBiblicalYearFromGregorianDate, getDayOfWeek } from './utils/dateHelpers.js';
+import {
+  addDays,
+  fromIsoDateLocal,
+  getBiblicalYearFromGregorianDate,
+  getDayOfWeek,
+  toIsoDate
+} from './utils/dateHelpers.js';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 const state = {
   mode: 'predictive',
   view: 'yearly',
-  year: getBiblicalYearFromGregorianDate(new Date()),
+  year: 0,
   monthIdx: 0,
   selectedScriptureLabel: '',
+  currentContext: null,
+  currentContextKey: '',
+  followCurrentYear: true,
+  followCurrentMonth: true,
   settings: {
     firstDayOfWeek: 0,
     sunsetDayStart: true,
@@ -86,20 +96,42 @@ function exportCurrentYear(format) {
 }
 
 function findBiblicalDateInYear(yearData, date) {
+  const targetKey = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   for (const month of yearData.months) {
     const start = fromIsoDateLocal(month.startDate);
     const end = addDays(start, month.days);
-    if (date >= start && date < end) {
-      const day = Math.floor((date - start) / 86400000) + 1;
+    const startKey = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    const endKey = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+    if (targetKey >= startKey && targetKey < endKey) {
+      const day = Math.floor((targetKey - startKey) / 86400000) + 1;
       return { month: month.name, day };
     }
   }
   return null;
 }
 
-function getEffectiveNow() {
-  const now = new Date();
-  return now.getHours() >= 18 ? addDays(now, 1) : new Date(now);
+function getEffectiveDate(now, settings) {
+  const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (!settings.sunsetDayStart) {
+    return base;
+  }
+  return now.getHours() >= 18 ? addDays(base, 1) : base;
+}
+
+function syncAutoFocus(currentContext) {
+  let changed = false;
+
+  if (state.followCurrentYear && state.year !== currentContext.biblicalYear) {
+    state.year = currentContext.biblicalYear;
+    changed = true;
+  }
+
+  if (state.followCurrentMonth && currentContext.monthIdx >= 0 && state.monthIdx !== currentContext.monthIdx) {
+    state.monthIdx = currentContext.monthIdx;
+    changed = true;
+  }
+
+  return changed;
 }
 
 function formatTwoDigits(value) {
@@ -110,7 +142,10 @@ function format24Time(date) {
   return `${formatTwoDigits(date.getHours())}:${formatTwoDigits(date.getMinutes())}:${formatTwoDigits(date.getSeconds())}`;
 }
 
-function getSunsetTransitionText(now) {
+function getSunsetTransitionText(now, settings) {
+  if (!settings.sunsetDayStart) {
+    return 'Sunset day start disabled (midnight boundary active).';
+  }
   const sunsetHour = 18;
   if (now.getHours() >= sunsetHour) {
     return 'After sunset: biblical date already transitioned.';
@@ -125,23 +160,37 @@ function getSunsetTransitionText(now) {
   return `Sunset transition at 18:00 (in ${formatTwoDigits(hours)}:${formatTwoDigits(minutes)}).`;
 }
 
-function getCurrentBiblicalContext() {
-  const now = new Date();
-  const effectiveDate = getEffectiveNow();
-  const biblicalYear = getBiblicalYearFromGregorianDate(effectiveDate);
-  const todayYearData = getYearData(biblicalYear);
-  const biblicalDate = findBiblicalDateInYear(todayYearData, effectiveDate);
-  const monthIdx = biblicalDate
-    ? todayYearData.months.findIndex((month) => month.name === biblicalDate.month)
-    : -1;
+function getContextKey(effectiveDate) {
+  return [toIsoDate(effectiveDate), state.mode, state.settings.cycleOffset].join('|');
+}
 
-  return {
-    now,
-    effectiveDate,
-    biblicalYear,
-    biblicalDate,
-    monthIdx
-  };
+function refreshCurrentContext(force = false) {
+  const now = new Date();
+  const effectiveDate = getEffectiveDate(now, state.settings);
+  const key = getContextKey(effectiveDate);
+
+  if (!state.currentContext || force || state.currentContextKey !== key) {
+    const biblicalYear = getBiblicalYearFromGregorianDate(effectiveDate, state.settings.cycleOffset);
+    const todayYearData = getYearData(biblicalYear);
+    const biblicalDate = findBiblicalDateInYear(todayYearData, effectiveDate);
+    const monthIdx = biblicalDate
+      ? todayYearData.months.findIndex((month) => month.name === biblicalDate.month)
+      : -1;
+
+    state.currentContext = {
+      now,
+      effectiveDate,
+      biblicalYear,
+      biblicalDate,
+      monthIdx
+    };
+    state.currentContextKey = key;
+  } else {
+    state.currentContext.now = now;
+    state.currentContext.effectiveDate = effectiveDate;
+  }
+
+  return state.currentContext;
 }
 
 function updateNowLabels(currentContext) {
@@ -149,7 +198,7 @@ function updateNowLabels(currentContext) {
   const dayLabel = WEEKDAYS[getDayOfWeek(effectiveDate)];
   refs.biblicalYearLabel.textContent = `Biblical Year ${biblicalYear}`;
   refs.time24Label.textContent = `24h Time ${format24Time(now)}`;
-  refs.sunsetTransitionLabel.textContent = getSunsetTransitionText(now);
+  refs.sunsetTransitionLabel.textContent = getSunsetTransitionText(now, state.settings);
 
   if (!biblicalDate) {
     refs.todayBiblicalLabel.textContent = `Today: ${dayLabel}, Biblical Year ${biblicalYear}`;
@@ -160,10 +209,11 @@ function updateNowLabels(currentContext) {
 }
 
 function render() {
+  const currentContext = refreshCurrentContext();
+  syncAutoFocus(currentContext);
   refs.yearInput.value = String(state.year);
   setNavState();
   const yearData = getYearData();
-  const currentContext = getCurrentBiblicalContext();
   updateNowLabels(currentContext);
 
   if (state.monthIdx >= yearData.months.length) {
@@ -185,6 +235,7 @@ function render() {
         state.settings,
         state.monthIdx,
         (idx) => {
+          state.followCurrentMonth = false;
           state.monthIdx = idx;
           render();
         },
@@ -234,10 +285,12 @@ refs.nav.addEventListener('click', (event) => {
 
   if (role === 'view' && value) {
     if (value === 'monthly') {
-      const currentContext = getCurrentBiblicalContext();
+      const currentContext = refreshCurrentContext();
       if (currentContext.monthIdx >= 0) {
         state.year = currentContext.biblicalYear;
         state.monthIdx = currentContext.monthIdx;
+        state.followCurrentYear = true;
+        state.followCurrentMonth = true;
       }
     }
     state.view = value;
@@ -247,11 +300,15 @@ refs.nav.addEventListener('click', (event) => {
 });
 
 refs.prevYear.addEventListener('click', () => {
+  state.followCurrentYear = false;
+  state.followCurrentMonth = false;
   state.year -= 1;
   render();
 });
 
 refs.nextYear.addEventListener('click', () => {
+  state.followCurrentYear = false;
+  state.followCurrentMonth = false;
   state.year += 1;
   render();
 });
@@ -259,14 +316,28 @@ refs.nextYear.addEventListener('click', () => {
 refs.yearInput.addEventListener('change', () => {
   const parsed = Number(refs.yearInput.value);
   if (Number.isFinite(parsed) && parsed > 0) {
+    state.followCurrentYear = false;
+    state.followCurrentMonth = false;
     state.year = Math.floor(parsed);
     render();
   }
 });
 
+state.year = getBiblicalYearFromGregorianDate(
+  getEffectiveDate(new Date(), state.settings),
+  state.settings.cycleOffset
+);
+
 render();
 
 setInterval(() => {
-  const context = getCurrentBiblicalContext();
+  const prevKey = state.currentContextKey;
+  const context = refreshCurrentContext();
+  const autoChanged = syncAutoFocus(context);
   updateNowLabels(context);
+  if (state.view === 'monthly' && (prevKey !== state.currentContextKey || autoChanged)) {
+    render();
+  } else if (state.view === 'yearly' && autoChanged) {
+    render();
+  }
 }, 1000);
